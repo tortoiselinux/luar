@@ -1,2 +1,3 @@
 lua-*
-build
+win-lua/
+build/
