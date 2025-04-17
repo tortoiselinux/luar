@@ -1,69 +1,85 @@
-# Makefile para empacotar scripts Lua standalone multiplataforma (Linux e Windows)
+# Makefile para empacotar scripts Lua standalone multiplataforma
 
 LUA_VERSION=5.4.6
 LUA_URL=https://www.lua.org/ftp/lua-$(LUA_VERSION).tar.gz
-LUA_TAR=$(LUA_DIR).tar.gz
-LUA_DIR=lua-$(LUA_VERSION)
-
+LUA_TAR=lua-$(LUA_VERSION).tar.gz
+LUA_DIR=lua-src
 STUB=stub.c
-SCRIPT=script.lua
-BUILD=build
+BUILD_DIR=build/runtime
+LUAR_LINUX=$(BUILD_DIR)/luar
+LUAR_WINDOWS=$(BUILD_DIR)/luar.exe
 
-# Compilador (Linux nativo e cross para Windows)
 CC_LINUX=gcc
 CC_WINDOWS=x86_64-w64-mingw32-gcc
 
-# Diretórios para build estático Windows
-WIN_LUA_DIR=win-lua
-WIN_LUA_INCLUDE=$(WIN_LUA_DIR)/include
-WIN_LUA_LIB=$(WIN_LUA_DIR)/lib
+# FHS
+PREFIX ?= /usr/local
+BINDIR := $(PREFIX)/bin
+LIBDIR := $(PREFIX)/lib/packer
+SHAREDIR := $(PREFIX)/share/packer
 
-# Artefatos
-STATIC_LUA=$(LUA_DIR)/src/liblua.a
-STATIC_WIN_LUA=$(WIN_LUA_LIB)/liblua.a
+# Scripts e libs
+PACKER_CLI = packer.lua
+LINKER_CLI = linker.lua
+LIBS = linkerlib.lua tlib.lua
+STUBS = stub.c
 
-.PHONY: all linux windows win-lua clean
+INSTALL = install
+MKDIR_P = mkdir -p
+RM = rm -f
+RMDIR = rmdir --ignore-fail-on-non-empty
 
-all: linux
+.PHONY: all linux windows clean install uninstall
 
-# Download e extração do Lua
+all: linux windows
+
+# Baixa o código-fonte do Lua e move pra pasta lua-src/
 $(LUA_TAR):
 	curl -R -O $(LUA_URL)
 
 $(LUA_DIR): $(LUA_TAR)
-	tar zxf $<
+	tar zxf $(LUA_TAR)
+	mv lua-$(LUA_VERSION) $(LUA_DIR)
 
 # Compila Lua estaticamente para Linux
-$(STATIC_LUA): $(LUA_DIR)
+$(LUA_DIR)/src/liblua.a: $(LUA_DIR)
 	$(MAKE) -C $(LUA_DIR) clean
 	$(MAKE) -C $(LUA_DIR) linux MYCFLAGS="-fPIC" MYLIBS="-lm"
 
-# Build do executável para Linux
-linux: $(STATIC_LUA)
-	@mkdir -p $(BUILD)
-	$(CC_LINUX) -o $(BUILD)/programa $(STUB) $(STATIC_LUA) -lm
-	cat $(SCRIPT) >> $(BUILD)/programa
-	chmod +x $(BUILD)/programa
-	@echo "✅ Executável Linux criado: $(BUILD)/programa"
+linux: $(LUA_DIR)/src/liblua.a
+	@mkdir -p $(BUILD_DIR)
+	$(CC_LINUX) -I$(LUA_DIR)/src -o $(LUAR_LINUX) $(STUB) $(LUA_DIR)/src/liblua.a -lm
+	chmod +x $(LUAR_LINUX)
+	@echo "✅ Executável Linux criado: $(LUAR_LINUX)"
 
-# Compila Lua para Windows (cross-compile)
-$(STATIC_WIN_LUA): $(LUA_DIR)
-	mkdir -p $(WIN_LUA_INCLUDE) $(WIN_LUA_LIB)
-	cd $(LUA_DIR) && make clean && make mingw CC=$(CC_WINDOWS)
-	cp $(LUA_DIR)/src/*.h $(WIN_LUA_INCLUDE)/
-	cp $(LUA_DIR)/src/liblua.a $(WIN_LUA_LIB)/
+windows: $(LUA_DIR)
+	@mkdir -p $(BUILD_DIR)
+	$(MAKE) -C $(LUA_DIR) clean
+	$(MAKE) -C $(LUA_DIR) mingw CC=$(CC_WINDOWS)
+	$(CC_WINDOWS) -I$(LUA_DIR)/src -o $(LUAR_WINDOWS) $(STUB) $(LUA_DIR)/src/liblua.a -lm
+	@echo "✅ Executável Windows criado: $(LUAR_WINDOWS)"
 
-win-lua: $(STATIC_WIN_LUA)
-
-# Build do executável para Windows
-windows: $(STATIC_WIN_LUA)
-	@mkdir -p $(BUILD)
-	$(CC_WINDOWS) -o $(BUILD)/programa.exe $(STUB) \
-		-I$(WIN_LUA_INCLUDE) \
-		$(STATIC_WIN_LUA) -lm
-	cat $(SCRIPT) >> $(BUILD)/programa.exe
-	@echo "✅ Executável Windows criado: $(BUILD)/programa.exe"
-
-# Limpa tudo
 clean:
-	rm -rf $(BUILD) $(LUA_DIR) $(WIN_LUA_DIR) $(LUA_TAR)
+	rm -rf $(BUILD_DIR) $(LUA_DIR) $(LUA_TAR)
+
+# Instala CLI e bibliotecas
+install: builddirs
+	$(INSTALL) -m 755 $(PACKER_CLI) $(BINDIR)/packer
+	$(INSTALL) -m 755 $(LINKER_CLI) $(BINDIR)/linker
+	$(INSTALL) -m 644 $(LIBS) $(LIBDIR)
+	$(INSTALL) -m 644 $(STUBS) $(SHAREDIR)
+	@echo "✅ Packer e Linker instalados com sucesso em $(PREFIX)"
+
+builddirs:
+	$(MKDIR_P) $(BINDIR)
+	$(MKDIR_P) $(LIBDIR)
+	$(MKDIR_P) $(SHAREDIR)
+
+uninstall:
+	$(RM) $(BINDIR)/packer
+	$(RM) $(BINDIR)/linker
+	$(RM) $(addprefix $(LIBDIR)/, $(LIBS))
+	$(RM) $(addprefix $(SHAREDIR)/, $(STUBS))
+	$(RMDIR) $(LIBDIR)
+	$(RMDIR) $(SHAREDIR)
+	@echo "🗑️ Remoção concluída de $(PREFIX)"
