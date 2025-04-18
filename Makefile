@@ -15,14 +15,14 @@ CC_WINDOWS=x86_64-w64-mingw32-gcc
 # FHS
 PREFIX ?= /usr/local
 BINDIR := $(PREFIX)/bin
-LIBDIR := $(PREFIX)/lib/packer
+LIBDIR := $(PREFIX)/lib/lua/5.4
 SHAREDIR := $(PREFIX)/share/packer
 
 # Scripts e libs
 PACKER_CLI = packer.lua
 LINKER_CLI = linker.lua
 LIBS = linkerlib.lua tlib.lua
-STUBS = stub.c
+STUBS = $(LUAR_LINUX) $(LUAR_WINDOWS)
 
 INSTALL = install
 MKDIR_P = mkdir -p
@@ -67,7 +67,7 @@ install: builddirs
 	$(INSTALL) -m 755 $(PACKER_CLI) $(BINDIR)/packer
 	$(INSTALL) -m 755 $(LINKER_CLI) $(BINDIR)/linker
 	$(INSTALL) -m 644 $(LIBS) $(LIBDIR)
-	$(INSTALL) -m 644 $(STUBS) $(SHAREDIR)
+	$(INSTALL) -m 755 $(STUBS) $(SHAREDIR)
 	@echo "✅ Packer e Linker instalados com sucesso em $(PREFIX)"
 
 builddirs:

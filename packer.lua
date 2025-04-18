@@ -2,7 +2,10 @@
 --[[LUA_SCRIPT_START]]
 
 local t = require("tlib")
-local luar = "build/runtime/luar"
+-- local luar = "build/runtime/luar"
+local luardir = "/usr/local/share/packer"
+local luar_unix = luardir .. "/luar"
+local luar_win = luardir .. "/luar.exe"
 local filename
 function help()
    local helpmsg=
@@ -58,7 +61,7 @@ end
 function pack_to_linux(script, filename)
    filename = filename or script
    output_linux = "./" .. script:gsub("%.lua$", "")
-   copy_stub(luar, output_linux)
+   copy_stub(luar_unix, output_linux)
    concat(output_linux, script)
    print("✅ Executável Linux criado: " .. filename:gsub("%.lua$", ""))
    return output_linux
@@ -67,7 +70,7 @@ end
 function pack_to_windows(script, filename)
    filename = filename or script
    output_windows = "./" .. script:gsub("%.lua$", "") .. ".exe"
-   copy_stub(luar .. ".exe", output_windows)
+   copy_stub(luar_win, output_windows)
    concat(output_windows, script)
    print("✅ Executável Windows criado: " .. filename:gsub("%.lua$", "") .. ".exe")
    return output_windows
