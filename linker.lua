@@ -3,7 +3,7 @@
 local t = require("tlib")
 
 local function help()
-   local helpmsg = [[
+	local helpmsg = [[
 
  🐢 Tortoise Lua Linker
 
@@ -24,7 +24,7 @@ local function help()
  see: https://github.com/tortoiselinux/packer
  
 ]]
-print(helpmsg)
+	print(helpmsg)
 end
 
 local function exit(code)
@@ -37,27 +37,27 @@ local filename, script
 local namespace = "linked_"
 
 local function extract_shebang(content)
-   local first_line = content:match("^(#![^\n]*)\n")
-   if first_line then
-      content = content:gsub("^#![^\n]*\n", "")
-      return first_line, content
-   end
-   return nil, content
+	local first_line = content:match("^(#![^\n]*)\n")
+	if first_line then
+		content = content:gsub("^#![^\n]*\n", "")
+		return first_line, content
+	end
+	return nil, content
 end
 
 local function link(lua_module)
 	local content = "\n" .. "--modid:" .. lua_module .. "\n"
 	local mod = t.read_file(lua_module)
 	mod = mod:gsub("^#![^\n]*\n", "")
-   	mod = mod:gsub("[\r\n]*%s*return%s+[%w_]+%s*$", "")
-   	content = content .. mod .. "\n--modend:" .. lua_module .. "\n"
-   	return content
+	mod = mod:gsub("[\r\n]*%s*return%s+[%w_]+%s*$", "")
+	content = content .. mod .. "\n--modend:" .. lua_module .. "\n"
+	return content
 end
 
 -- filename = filename:match("^(.*)%.lua$")
 if #arg == 0 then
-   help()
-   exit(1)
+	help()
+	exit(1)
 end
 if t.verify_args(arg, { "h", "-h", "help", "--help" }) then
 	help()
@@ -73,9 +73,7 @@ if t.verify_args(arg, { "o", "-o", "output", "--output" }) then
 		end
 	end
 	local main = t.read_file(script)
-	main = main
-		:gsub('local%s+(%w+)%s*=%s*require%s*%("([^"]+)"%)', "local %1 = %2")
-		:gsub("^#![^\n]*\n", "")
+	main = main:gsub('local%s+(%w+)%s*=%s*require%s*%("([^"]+)"%)', "local %1 = %2"):gsub("^#![^\n]*\n", "")
 	linked_script = linked_script .. "\n" .. main
 	t.write_file(filename, "w", linked_script)
 	print("Generated linked file: " .. filename)
@@ -91,9 +89,7 @@ for i in ipairs(arg) do
 	end
 end
 local main = t.read_file(script)
-main = main
-	:gsub('local%s+(%w+)%s*=%s*require%s*%("([^"]+)"%)', "local %1 = %2")
-	:gsub("^#![^\n]*\n", "")
+main = main:gsub('local%s+(%w+)%s*=%s*require%s*%("([^"]+)"%)', "local %1 = %2"):gsub("^#![^\n]*\n", "")
 
 linked_script = linked_script .. "\n" .. main
 t.write_file(filename, "w", linked_script)
