@@ -1,11 +1,25 @@
 #!/usr/bin/env lua
 
 local t = require("tlib")
--- local luar = "build/runtime/luar"
+
+local function exit(code)
+	os.exit(code)
+end
+
+local function fmt(msg, ...)
+   return string.format(msg, ...)
+end
+
+local major = 1
+local minor = 0
+local patch = 0
+
+local version = fmt("v%s.%s.%s", major, minor, patch)
+
 local function help()
    local help_msg = [[
 
- 🐢 Tortoise Lua Packer
+ 🐢 Tortoise Lua Packer (v)
 
  How To use:
  packer script
@@ -31,13 +45,41 @@ local function help()
 print(help_msg)
 end
 
-local function exit(code)
-	os.exit(code)
+local config_locations = {
+   "/etc/luar/packer_config.lua",
+   "/etc/packer_config.lua",
+   "config/packer_config.lua",
+   "packer_config.lua",
+}
+
+local function load_config()
+   for _, path in ipairs(config_locations) do
+      local f = io.open(path, "r")
+      if f then
+         f:close()
+         local ok, conf = pcall(dofile, path)
+         if ok and type(conf) == "table" then
+            return conf
+         end
+      end
+   end
+   print("⚠️  No configuration file found. Using default settings.")
+   return {}
 end
 
-local luardir = "/usr/local/share/packer"
-local luar_unix = luardir .. "/luar"
-local luar_win = luardir .. "/luar.exe"
+local config = load_config()
+
+local function find_stub(stub_name)
+    for _, dir in ipairs(config.stub_locations) do
+        local path = dir .. stub_name
+        local f = io.open(path, "rb")
+        if f then f:close(); return path end
+    end
+    return nil
+end
+
+local luar_unix = find_stub("luar")
+local luar_win = find_stub("luar.exe")
 local script
 local filename
 local namespace = "packed_"
@@ -65,20 +107,22 @@ local function copy_stub(src, dest)
 end
 
 local function pack_to_linux(script, filename)
+   assert(luar_unix, "❌ Stub 'luar' for Linux not found.")
    filename = filename or script
    local output_linux = "./" .. script:gsub("%.lua$", "")
    copy_stub(luar_unix, output_linux)
    concat(output_linux, script)
-   print("✅ Executável Linux criado: " .. namespace .. filename:gsub("%.lua$", ""))
+   print("✅ Linux executable generated: " .. namespace .. filename:gsub("%.lua$", ""))
    return output_linux
 end
 
 local function pack_to_windows(script, filename)
+   assert(luar_win, "❌ Stub 'luar.exe' for Windows not found.")
    filename = filename or script
    local output_windows = "./" .. script:gsub("%.lua$", "") .. ".exe"
    copy_stub(luar_win, output_windows)
    concat(output_windows, script)
-   print("✅ Executável Windows criado: " .. namespace .. filename:gsub("%.lua$", "") .. ".exe")
+   print("✅ Windows executable generated: " .. namespace .. filename:gsub("%.lua$", "") .. ".exe")
    return output_windows
 end
 
@@ -86,6 +130,12 @@ end
 if #arg == 0 then
    help()
    exit(1)
+end
+
+
+if t.verify_args(arg, { "v", "-v", "version", "--version" }) then
+   print("🐢 Tortoise Packer version: " .. version)
+   exit(0)
 end
 
 if t.verify_args(arg, { "h", "-h", "help", "--help" }) then
