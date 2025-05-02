@@ -3,7 +3,7 @@ local m1 = require("module1")
 local m2 = require("module2")
 local m3 = require("module3")
 
-function help()
+local function help()
 local helpmsg=[[
  🐢 Hey this script is running in embedded mode!
  Options:
@@ -20,17 +20,17 @@ local helpmsg=[[
 print(helpmsg)
 end
 
-function print_args()
+local function print_args()
    for i, v in ipairs(arg) do
       print(string.format("arg[%d] = %s", i, v))
    end
 end
 
-function test_modules()
+local function test_modules()
    m1.hello()
    m2.hello()
    m3.hello()
-   output = tlib.run("echo", "🐢 Hello from Tlib")
+   local output = tlib.run("echo", "🐢 Hello from Tlib")
    print(output)
 end
 
