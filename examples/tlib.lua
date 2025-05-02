@@ -25,6 +25,27 @@ function tlib.import(full_path)
    return require(modname), package.path, path, modname
 end
 
+local debug_info = debug.getinfo(1, "S")
+tlib.__dirname = debug_info.source:gsub("@", ""):match("(.*/)")
+tlib.__filename = debug_info.source:gsub("@", ""):match("([^/]+)$")
+
+function tlib.fmt(msg, ...)
+   return string.format(msg, ...)
+end
+
+function tlib.printf(msg, ...)
+    io.write(string.format(msg, ...))
+end
+
+function tlib.println(msg, ...)
+    tlib.printf(msg .. "\n", ...)
+end
+
+function tlib.exit(code)
+    os.exit(code)
+end
+
+
 function tlib.parse_args(...)
    local args = {...}
    local cmd = table.concat(args, " ")
@@ -39,6 +60,9 @@ end
 function tlib.run(...)
    local cmd = tlib.parse_args(...)
    local out = io.popen(cmd .. " 2>&1")
+   if not out then
+      return nil, "Failed to run command: " .. cmd
+   end
    local result = out:read("*a")
    local success, exit_code = out:close()
    if success == nil then
@@ -49,13 +73,20 @@ end
 
 function tlib.write_file(filename, access, content)
    local file = io.open(filename, access)
+   if not file then
+      error("Failed to open file: " .. filename)
+   end
    file:write(content)
    file:close()
 end
 
 function tlib.read_file(filename)
    local file = io.open(filename)
-   content = file:read("*a")
+   if not file then
+      error("Failed to open file: " .. filename)
+   end
+   local content = file:read("*a")
+   file:close()
    return content
 end
 
@@ -68,11 +99,17 @@ function tlib.ls(dir)
 end
 
 function tlib.rmdir(dir)
-   ok, err = os.remove(dir)
+   local ok, err = os.remove(dir)
+   if not ok then
+      error("Failed to remove directory: " .. dir .. " - " .. (err or "unknown error"))
+   end
 end
 
 function tlib.mkfile(filename)
-   file = io.open(filename)
+   local file = io.open(filename, "w")
+   if not file then
+      error("Failed to create file: " .. filename)
+   end
    file:write("")
    file:close()
 end
@@ -96,20 +133,18 @@ function tlib.check_args(argi, expected, func)
 end
 
 function tlib.verify_args(argi, expected)
-   for ai, av in ipairs(argi) do
+   for ai, _ in ipairs(argi) do
       for ei, ev in ipairs(expected) do
-	 if argi[ai] == ev then
-	    return true
-	 end
+	      if argi[ai] == ev then
+	         return true
+	      end
       end
    end
    return false
 end
 
 function tlib.get_arg(argi, index)
-   for _, v in ipairs(argi) do
-      return argi[index] 
-   end
+   return argi[index]
 end
 
 function tlib.check_lib(lib_table)
