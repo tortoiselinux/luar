@@ -2,13 +2,8 @@
 
 local t = require("tlib")
 
-local function exit(code)
-	os.exit(code)
-end
-
-local function fmt(msg, ...)
-   return string.format(msg, ...)
-end
+local exit = t.exit
+local fmt = t.fmt
 
 local major = 1
 local minor = 0
@@ -135,8 +130,9 @@ end
 
 if t.verify_args(arg, { "v", "-v", "version", "--version" }) then
    print("🐢 Tortoise Packer version: " .. version)
-   exit(0)
+   exit(1)
 end
+
 
 if t.verify_args(arg, { "h", "-h", "help", "--help" }) then
    help()
