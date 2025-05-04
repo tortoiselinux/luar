@@ -17,11 +17,13 @@ PREFIX ?= /usr/local
 BINDIR := $(PREFIX)/bin
 LIBDIR := $(PREFIX)/lib/lua/5.4
 SHAREDIR := $(PREFIX)/share/packer
+CONFIGDIR=/etc/luar
 
 # Scripts e libs
 PACKER_CLI = packer.lua
 LINKER_CLI = linker.lua
-LIBS = linkerlib.lua tlib.lua
+LIBS = tlib.lua
+CONFIGS = packer_config.lua
 STUBS = $(LUAR_LINUX) $(LUAR_WINDOWS)
 
 INSTALL = install
@@ -67,6 +69,7 @@ install: builddirs
 	$(INSTALL) -m 755 $(PACKER_CLI) $(BINDIR)/packer
 	$(INSTALL) -m 755 $(LINKER_CLI) $(BINDIR)/linker
 	$(INSTALL) -m 644 $(LIBS) $(LIBDIR)
+	$(INSTALL) -m 644 $(CONFIGS) $(CONFIGDIR)
 	$(INSTALL) -m 755 $(STUBS) $(SHAREDIR)
 	@echo "✅ Packer e Linker instalados com sucesso em $(PREFIX)"
 
@@ -74,6 +77,7 @@ builddirs:
 	$(MKDIR_P) $(BINDIR)
 	$(MKDIR_P) $(LIBDIR)
 	$(MKDIR_P) $(SHAREDIR)
+	$(MKDIR_P) $(CONFIGDIR)
 
 uninstall:
 	$(RM) $(BINDIR)/packer
