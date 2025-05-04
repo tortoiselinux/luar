@@ -31,7 +31,7 @@ local function exit(code)
 	os.exit(code)
 end
 
-local MAGIC_MARK = "-- LUA_SCRIPT_START"
+local MAGIC_MARK = "--[[LUA_SCRIPT_START]]"
 local linked_script = MAGIC_MARK .. "\n"
 local filename, script
 local namespace = "linked_"
@@ -75,8 +75,8 @@ if t.verify_args(arg, { "o", "-o", "output", "--output" }) then
 	local main = t.read_file(script)
 	main = main:gsub('local%s+(%w+)%s*=%s*require%s*%("([^"]+)"%)', "local %1 = %2"):gsub("^#![^\n]*\n", "")
 	linked_script = linked_script .. "\n" .. main
-	t.write_file(filename, "w", linked_script)
-	print("Generated linked file: " .. filename)
+	t.write_file(filename .. ".lua", "w", linked_script)
+	print("Generated linked file: " .. filename .. ".lua")
 	exit(0)
 end
 
