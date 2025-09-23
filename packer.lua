@@ -14,7 +14,7 @@ local version = fmt("v%s.%s.%s", major, minor, patch)
 local function help()
 	local help_msg = [[
 
- 🐢 Tortoise Lua Packer (v)
+ Luar Packer (v)
 
  How To use:
  packer script
@@ -33,9 +33,9 @@ local function help()
 
  NOTE: (-) or (--) are optional
 
- Hey, this script is part of the lua packer!
+ Hey, this script is part of the luar project!
  To see how you can make embedded scripts
- see: https://github.com/tortoiselinux/packer 
+ see: https://github.com/tortoiselinux/luar
 ]]
 	print(help_msg)
 end
@@ -58,7 +58,7 @@ local function load_config()
 			end
 		end
 	end
-	print("⚠️  No configuration file found. Using default settings.")
+	print("No configuration file found. Using default settings.")
 	return {
 		config_locations = {
 			"/etc/luar/packer_config.lua",
@@ -120,22 +120,22 @@ local function copy_stub(src, dest)
 end
 
 local function pack_to_linux(script, filename)
-	assert(luar_unix, "❌ Stub 'luar' for Linux not found.")
+	assert(luar_unix, "Stub 'luar' for Linux not found.")
 	filename = filename or script
 	local output_linux = "./" .. script:gsub("%.lua$", "")
 	copy_stub(luar_unix, output_linux)
 	concat(output_linux, script)
-	print("✅ Linux executable generated: " .. namespace .. filename:gsub("%.lua$", ""))
+	print("Linux executable generated: " .. namespace .. filename:gsub("%.lua$", ""))
 	return output_linux
 end
 
 local function pack_to_windows(script, filename)
-	assert(luar_win, "❌ Stub 'luar.exe' for Windows not found.")
+	assert(luar_win, "Stub 'luar.exe' for Windows not found.")
 	filename = filename or script
 	local output_windows = "./" .. script:gsub("%.lua$", "") .. ".exe"
 	copy_stub(luar_win, output_windows)
 	concat(output_windows, script)
-	print("✅ Windows executable generated: " .. namespace .. filename:gsub("%.lua$", "") .. ".exe")
+	print("Windows executable generated: " .. namespace .. filename:gsub("%.lua$", "") .. ".exe")
 	return output_windows
 end
 
@@ -145,7 +145,7 @@ if #arg == 0 then
 end
 
 if t.verify_args(arg, { "v", "-v", "version", "--version" }) then
-	print("🐢 Tortoise Packer version: " .. version)
+	print("Tortoise Packer version: " .. version)
 	exit(1)
 end
 

@@ -1,12 +1,19 @@
-# PACKER (luar)
+#+TITLE: LUAR
+#+AUTHOR: Wellyton Barbosa Galdino
+#+DESCRIPTION: Luar is a tool for compiling embedded binary executables to run Lua even without the language installed. It's lightweight and doesn't depend on Luarocks.
+#+STARTUP: showeverything
+#+OPTIONS: toc:2
+#+OBS: You can reproduce this by watching the DT tutorial on youtube
+
+
+* PACKER (luar)
 
 This project contains a set of tools for linking and packaging
 Lua scripts into embedded binaries, which can run even if Lua
 is not installed.
 
-## Hot to use
 
-### build stubs
+** building
 
 This tool uses "stub.c" which is an executable compiled with lua embedded,
 it is able to find the script concatenated at the end of it using a special
@@ -18,7 +25,7 @@ to generate the executables type:
 
 it will generate two executables, for linux and windows
 
-### linker
+** the linker
 
 The Linker is a tool that takes a script and modules passed to it
 and turns them into a single thing.
@@ -41,12 +48,14 @@ But a example can be founded in: examples/
 
 To prepare the linked script in example use:
 
+#+begin_src shell
     lua linker.lua -o linked_script.lua \
         examples/program.lua \
         examples/tlib.lua    \
         examples/module1.lua \
         examples/module2.lua \
         examples/module3.lua
+#+end_src
 
 The linker will prepare a file with all modules and the main script
 all in one. So you can execute the script without depends on Lua path

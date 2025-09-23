@@ -31,7 +31,7 @@ int run_embedded_script(lua_State *L, const char *filename, int argc, char **arg
   }
 
   if (!start) {
-    fprintf(stderr, "❌ Script não encontrado no executável.\n");
+    fprintf(stderr, "Script não encontrado no executável.\n");
     free(buffer);
     return 1;
   }
@@ -48,7 +48,7 @@ int run_embedded_script(lua_State *L, const char *filename, int argc, char **arg
   lua_setglobal(L, "arg");
 
   if (luaL_dostring(L, start)) {
-    fprintf(stderr, "💥 Erro ao executar: %s\n", lua_tostring(L, -1));
+    fprintf(stderr, "Erro ao executar: %s\n", lua_tostring(L, -1));
     lua_pop(L, 1);
   }
 

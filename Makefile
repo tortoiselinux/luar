@@ -52,14 +52,14 @@ linux: $(LUA_DIR)/src/liblua.a
 	@mkdir -p $(BUILD_DIR)
 	$(CC_LINUX) -I$(LUA_DIR)/src -o $(LUAR_LINUX) $(STUB) $(LUA_DIR)/src/liblua.a -lm
 	chmod +x $(LUAR_LINUX)
-	@echo "✅ Executável Linux criado: $(LUAR_LINUX)"
+	@echo "Executável Linux criado: $(LUAR_LINUX)"
 
 windows: $(LUA_DIR)
 	@mkdir -p $(BUILD_DIR)
 	$(MAKE) -C $(LUA_DIR) clean
 	$(MAKE) -C $(LUA_DIR) mingw CC=$(CC_WINDOWS)
 	$(CC_WINDOWS) -I$(LUA_DIR)/src -o $(LUAR_WINDOWS) $(STUB) $(LUA_DIR)/src/liblua.a -lm
-	@echo "✅ Executável Windows criado: $(LUAR_WINDOWS)"
+	@echo "Executável Windows criado: $(LUAR_WINDOWS)"
 
 clean:
 	rm -rf $(BUILD_DIR) $(LUA_DIR) $(LUA_TAR)
@@ -71,7 +71,7 @@ install: builddirs
 	$(INSTALL) -m 644 $(LIBS) $(LIBDIR)
 	$(INSTALL) -m 644 $(CONFIGS) $(CONFIGDIR)
 	$(INSTALL) -m 755 $(STUBS) $(SHAREDIR)
-	@echo "✅ Packer e Linker instalados com sucesso em $(PREFIX)"
+	@echo "Packer e Linker instalados com sucesso em $(PREFIX)"
 
 builddirs:
 	$(MKDIR_P) $(BINDIR)
@@ -86,4 +86,4 @@ uninstall:
 	$(RM) $(addprefix $(SHAREDIR)/, $(STUBS))
 	$(RMDIR) $(LIBDIR)
 	$(RMDIR) $(SHAREDIR)
-	@echo "🗑️ Remoção concluída de $(PREFIX)"
+	@echo "Remoção concluída de $(PREFIX)"
