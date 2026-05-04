@@ -1,3 +1,5 @@
+local t = require("tlib")
+
 local main = arg[1]
 local modules = {}
 local bundle_path = "bundle.lua"
@@ -14,6 +16,16 @@ local function read_file(path)
     local content = f:read("*a")
     f:close()
     return content
+end
+
+function get_last_name(path)
+    local name = path:match("[/\\]([^/\\]+)$")
+
+    if name then
+        return name
+    else
+        return path:match("[^/\\]+$") or path
+    end
 end
 
 local function wrap_module(name, content)
@@ -38,8 +50,9 @@ local bundle = {}
 
 table.insert(bundle, "local __modules = {")
 for _, mod in ipairs(modules) do
-    local content = read_file(mod)
-    local name = normalize_name(mod)
+    local content = t.read_file(mod)
+    local normalized_path = normalize_name(mod)
+    local name = get_last_name(normalized_path)
     table.insert(bundle, wrap_module(name, content))
 end
 
